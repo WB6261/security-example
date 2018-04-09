@@ -16,12 +16,12 @@ namespace Fisher.Bookstore.Api.Security
     
     public class JwtFactory : IJwtFactory
     {
-        private readonly JwtIssuerOptions _jwtOptions;
+        private readonly JwtIssuerOptions jwtOptions;
 
         public JwtFactory(IOptions<JwtIssuerOptions> jwtOptions)
         {
-            _jwtOptions = jwtOptions.Value;
-            ThrowIfInvalidOptions(_jwtOptions);
+            this.jwtOptions = jwtOptions.Value;
+            ThrowIfInvalidOptions(this.jwtOptions);
         }
 
         public async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity)
@@ -29,20 +29,20 @@ namespace Fisher.Bookstore.Api.Security
             var claims = new[]
          {
                  new Claim(JwtRegisteredClaimNames.Sub, userName),
-                 new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
-                 new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
+                 new Claim(JwtRegisteredClaimNames.Jti, await jwtOptions.JtiGenerator()),
+                 new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
                  identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
                  identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
              };
 
             // Create the JWT security token and encode it.
             var jwt = new JwtSecurityToken(
-                issuer: _jwtOptions.Issuer,
-                audience: _jwtOptions.Audience,
+                issuer: jwtOptions.Issuer,
+                audience: jwtOptions.Audience,
                 claims: claims,
-                notBefore: _jwtOptions.NotBefore,
-                expires: _jwtOptions.Expiration,
-                signingCredentials: _jwtOptions.SigningCredentials);
+                notBefore: jwtOptions.NotBefore,
+                expires: jwtOptions.Expiration,
+                signingCredentials: jwtOptions.SigningCredentials);
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
