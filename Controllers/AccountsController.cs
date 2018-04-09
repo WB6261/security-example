@@ -23,12 +23,21 @@ namespace Fisher.Bookstore.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] Login login)
         {
-            var user = new ApplicationUser();
+            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, false, false);
+            if (result.Succeeded)
+            {
+                return Ok("Logged In");
+            }
+            if (result.IsLockedOut)
+            {
+                return BadRequest("Account Locked");
+            }
+            if (result.IsNotAllowed)
+            {
+                return Unauthorized();
+            }
 
-            user.Email = login.Email;
-            user.UserName = "Login";
-
-            return Ok(user);
+            return BadRequest("Unknown Error");
         }
 
         [HttpPost("register")]
@@ -44,7 +53,8 @@ namespace Fisher.Bookstore.Api.Controllers
 
             if (result.Succeeded)
             {
-                return Ok();
+                await signInManager.SignInAsync(user, isPersistent: false);
+                return Ok("Registered");
             }
             return BadRequest(result.Errors);
         }
