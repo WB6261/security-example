@@ -6,6 +6,7 @@ using Fisher.Bookstore.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Fisher.Bookstore.Api.Security;
 using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace Fisher.Bookstore.Api
 {
@@ -23,18 +24,28 @@ namespace Fisher.Bookstore.Api
         {
             services.AddDbContext<BookstoreContext>(options => options.UseNpgsql(Configuration.GetConnectionString("BookstoreConnection")));
             
+            // add the identity service
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<BookstoreContext>()
                 .AddDefaultTokenProviders();
             
+            // configure identity service
             services.Configure<IdentityOptions>(options => 
             {
+                // password settings
                 options.Password.RequiredLength = 8;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
+                
+                //user settings
                 options.User.RequireUniqueEmail = true;
+
+                //lockout settings
+                options.Lockout.AllowedForNewUsers = false;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+                options.Lockout.MaxFailedAccessAttempts = 5;
             });
 
             services.AddMvc()
