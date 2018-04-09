@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Fisher.Bookstore.Api.Data;
 using Fisher.Bookstore.Api.Security;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fisher.Bookstore.Api.Controllers
@@ -9,10 +10,14 @@ namespace Fisher.Bookstore.Api.Controllers
     public class AccountsController : Controller
     {
         private readonly BookstoreContext db;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
 
-        public AccountsController(BookstoreContext db)
+        public AccountsController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, BookstoreContext db)
         {
             this.db = db;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
         }
 
         [HttpPost("login")]
@@ -29,12 +34,19 @@ namespace Fisher.Bookstore.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] Login login)
         {
-            var user = new ApplicationUser();
+            var user = new ApplicationUser()
+            {
+                UserName = login.Email,
+                Email = login.Email
+            };
 
-            user.Email = login.Email;
-            user.UserName = "Register";
+            var result = await userManager.CreateAsync(user, login.Password);
 
-            return Ok(user);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return BadRequest(result.Errors);
         }
     }
 }
