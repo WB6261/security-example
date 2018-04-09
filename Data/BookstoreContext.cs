@@ -1,18 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Fisher.Bookstore.Api.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Fisher.Bookstore.Api.Security;
 
 namespace Fisher.Bookstore.Api.Data
 {
-    public class BookstoreContext : DbContext
+    public class BookstoreContext : IdentityDbContext<ApplicationUser>
     {
         public BookstoreContext(DbContextOptions<BookstoreContext> options)
             : base(options)
         {
-            // delete constructor code that seeded our data
+         
         }
 
         protected override void OnModelCreating(ModelBuilder builder) => base.OnModelCreating(builder);
-
 
         public DbSet<Book> Books { get; set; }
         public DbSet<Author> Authors { get; set; }
